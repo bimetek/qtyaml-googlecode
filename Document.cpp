@@ -26,6 +26,10 @@ Document::Document(QString file, QIODevice::OpenModeFlag openMode) :
     yamlFile(file)
 {
 
+    if(!QFile::exists(file)) {
+        qDebug() << "File not found : " << file;
+    }
+
     yamlFile.open(openMode);
     opened = openMode;
 
@@ -56,6 +60,7 @@ Node *Document::getNode(QString name, QString defaultValue) {
                     if(value.isEmpty() || value.startsWith("-")) {
                         //Array !
                         node->setType(NT_Array);
+                        node->clearValueList();
                         if(value.startsWith("-")) {
                             QString firstArrayValue = value.right(value.size() - 1);
                             firstArrayValue = firstArrayValue.right(firstArrayValue.size() - getLineRealStart(firstArrayValue));
@@ -70,6 +75,7 @@ Node *Document::getNode(QString name, QString defaultValue) {
             } else if(node->getNodeType() == NT_Array && line.startsWith("-")) {
                 //Adding value to array...
                 QString value = removeComments(line.right(line.size() - 1));
+                value = value.right(value.size() - getLineRealStart(value));
                 node->appendValue(value);
             }
         }
