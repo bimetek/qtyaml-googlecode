@@ -22,12 +22,93 @@
 
 namespace YAML {
 
-Document::Document() {
+Document::Document(QString file, QIODevice::OpenModeFlag openMode) :
+    yamlFile(file)
+{
 
+    yamlFile.open(openMode);
+    opened = openMode;
+
+    if(openMode == QIODevice::ReadOnly || openMode == QIODevice::ReadWrite) {
+        //Reading lines...
+        while(!yamlFile.atEnd())
+            lines.append(QString(yamlFile.readLine()).remove("\n"));
+    }
 }
 
 Document::~Document() {
+    yamlFile.close();
+}
 
+Node *Document::getNode(QString name, QString defaultValue) {
+    Node *node = new Node(defaultValue);
+
+    for(int i = 0; i < lines.count(); i++) {
+        if(!lines[i].isEmpty() && !lines[i].startsWith("#")) {
+            QString line = lines[i].right(lines[i].size() - getLineRealStart(lines[i]));
+            if(line.startsWith(name + ":")) {
+                QString value = line.split(":")[1];
+                value = value.right(value.size() - getLineRealStart(value));
+                if(value.startsWith("{")) {
+                    //Block !
+                } else {
+                    value = removeComments(value);
+                    if(value.isEmpty() || value.startsWith("-")) {
+                        //Array !
+                        node->setType(NT_Array);
+                        if(value.startsWith("-")) {
+                            QString firstArrayValue = value.right(value.size() - 1);
+                            firstArrayValue = firstArrayValue.right(firstArrayValue.size() - getLineRealStart(firstArrayValue));
+                            node->appendValue(firstArrayValue);
+                        }
+                    } else {
+                        //Simple value...
+                        node->setValue(value);
+                        break;
+                    }
+                }
+            } else if(node->getNodeType() == NT_Array && line.startsWith("-")) {
+                //Adding value to array...
+                QString value = removeComments(line.right(line.size() - 1));
+                node->appendValue(value);
+            }
+        }
+    }
+
+    return node;
+}
+
+int Document::getLineRealStart(QString line) {
+    int ret = -1;
+
+    for(int i = 0; i < line.size(); i++) {
+        if(line[i] != ' ') {
+            ret = i;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+QString Document::removeComments(QString line) {
+    QString ret = line;
+    int dieseAt = -1;
+
+    for(int i = line.size() - 1; i > 0; i--) {
+        if(line[i] == '#') {
+            dieseAt = i - 1;
+            break;
+        }
+    }
+
+    if(dieseAt != -1)
+        ret = line.left(dieseAt);
+
+    while(ret[ret.size() - 1] == ' ')
+        ret = ret.left(ret.size() - 1);
+
+    return ret;
 }
 
 }

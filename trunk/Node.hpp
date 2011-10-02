@@ -18,31 +18,43 @@
  *
  */
 
-#ifndef DOCUMENT_HPP
-#define DOCUMENT_HPP
+#ifndef NODE_HPP
+#define NODE_HPP
 
-#include "qtyaml_global.hpp"
-#include "Node.hpp"
 #include <QtCore>
+#include "qtyaml_global.hpp"
 
 namespace YAML {
 
-class QTYAMLSHARED_EXPORT Document {
-public:
-    Document(QString file, QIODevice::OpenModeFlag openMode);
-    ~Document();
+enum NodeType {
+    NT_Array,
+    NT_Property
+};
 
-    Node *getNode(QString name, QString defaultValue = "");
+class QTYAMLSHARED_EXPORT Node
+{
+public:
+    Node(QString value, NodeType ntype = NT_Property, Node *nparent = 0);
+    Node(QStringList nvalues, NodeType ntype = NT_Property, Node *nparent = 0);
+
+    NodeType getNodeType();
+    Node *getParent();
+    QString getValue();
+    QStringList getValues();
+
+    void setParent(Node *nparent);
+    void setValue(QString value);
+    void setValues(QStringList nvalues);
+    void setType(NodeType ntype);
+
+    void appendValue(QString value);
 
 private:
-    QFile yamlFile;
-    QStringList lines;
-    QIODevice::OpenModeFlag opened;
-
-    int getLineRealStart(QString line);
-    QString removeComments(QString line);
+    NodeType type;
+    Node *parent;
+    QStringList values;
 };
 
 }
 
-#endif // DOCUMENT_HPP
+#endif // NODE_HPP
