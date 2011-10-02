@@ -48,6 +48,7 @@ public:
     void setType(NodeType ntype);
 
     void appendValue(QString value);
+    void clearValueList();
 
 private:
     NodeType type;

@@ -23,7 +23,7 @@
 namespace YAML {
 
 Node::Node(QString value, NodeType ntype, Node *nparent) {
-    values[0] = value;
+    values.append(value);
     type = ntype;
     parent = nparent;
 }
@@ -83,6 +83,13 @@ void Node::appendValue(QString value) {
         return;
 
     values.append(value);
+}
+
+void Node::clearValueList() {
+    if(type != NT_Array)
+        return;
+
+    values.clear();
 }
 
 }
