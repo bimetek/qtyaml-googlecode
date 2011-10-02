@@ -11,10 +11,12 @@ TEMPLATE = lib
 
 DEFINES += QTYAML_LIBRARY
 
-SOURCES += QtYaml.cpp
+SOURCES += \
+    Document.cpp
 
-HEADERS += QtYaml.hpp\
-        qtyaml_global.hpp
+HEADERS +=\
+        qtyaml_global.hpp \
+    Document.hpp
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
@@ -34,3 +36,7 @@ unix:!symbian {
     }
     INSTALLS += target
 }
+
+
+
+
